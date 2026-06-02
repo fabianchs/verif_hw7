@@ -38,7 +38,6 @@ interface tb_if(input bit clk);
     // condiciones de carrera con procesos sensibles al flanco.
     start = 1'b1;
     @(posedge clk);
-    @(posedge clk);
     start = 1'b0;
   endtask
 

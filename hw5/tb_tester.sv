@@ -42,6 +42,7 @@ module tester();
         tb_top.intf.pulse_start();
         // esperar a que el DUT indique done
         wait (tb_top.intf.done == 1'b1);
+        wait (tb_top.intf.done == 1'b0);
         @(posedge tb_top.intf.clk);
       end
 

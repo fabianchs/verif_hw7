@@ -1,29 +1,14 @@
 /*
-Autor: Fabian Chacón 201813154
-Tecnológico de Costa Rica
-Módulo: multiplier_fsm
+Autor: Fabian Chacon 201813154
+Tecnologico de Costa Rica
+Modulo: multiplier_fsm
 
-Descripción:
+Descripcion:
 FSM de control para el multiplicador secuencial de 32 bits.
 
-Controla:
-- load
-- add
-- shift
-- done
-
-Ejemplo de uso:
-
-multiplier_fsm fsm(
-    .clk(clk),
-    .reset(reset),
-    .start(start),
-    .lsb(lsb),
-    .load(load),
-    .add(add),
-    .shift(shift),
-    .done(done)
-);
+Las senales load, add, shift y done se generan de forma combinacional a partir
+del estado actual. Esto permite que el datapath las observe en el mismo flanco
+de reloj y evita desfases de un ciclo entre control y datos.
 */
 
 module multiplier_fsm(
@@ -39,60 +24,76 @@ module multiplier_fsm(
 );
 
 reg [5:0] count;
-reg [1:0] state;
+reg [2:0] state;
+reg [2:0] next_state;
 
-localparam IDLE  = 2'b00;
-localparam CHECK = 2'b01;
-localparam ADD   = 2'b10;
-localparam SHIFT = 2'b11;
+localparam IDLE  = 3'b000;
+localparam CHECK = 3'b001;
+localparam ADD   = 3'b010;
+localparam SHIFT = 3'b011;
+localparam DONE  = 3'b100;
 
 always @(posedge clk or posedge reset) begin
     if (reset) begin
         state <= IDLE;
         count <= 6'd0;
-        load  <= 1'b0;
-        add   <= 1'b0;
-        shift <= 1'b0;
-        done  <= 1'b0;
     end else begin
-        // limpiar pulsos
-        load  <= 1'b0;
-        add   <= 1'b0;
-        shift <= 1'b0;
-        done  <= 1'b0;
+        state <= next_state;
 
-        case (state)
-        IDLE: begin
-            if (start) begin
-                load  <= 1'b1;   // carga {A=0, Q=b} y M=a
-                count <= 6'd0;
-                state <= CHECK;
-            end
-        end
-
-        CHECK: begin
-            if (lsb)
-                state <= ADD;    // si Q0=1 → sumar
-            else
-                state <= SHIFT;  // si Q0=0 → ir directo a shift
-        end
-
-        ADD: begin
-            add   <= 1'b1;       // A = A + M
-            state <= SHIFT;      // luego desplazar
-        end
-
-        SHIFT: begin
-            shift <= 1'b1;       // {A,Q} >> 1
+        if (state == IDLE && start) begin
+            count <= 6'd0;
+        end else if (state == SHIFT) begin
             count <= count + 1'b1;
-            if (count == 6'd31) begin
-                state <= IDLE;
-                done <= 1'b1;
-            end else
-                state <= CHECK;
         end
-        endcase
     end
+end
+
+always @(*) begin
+    load = 1'b0;
+    add = 1'b0;
+    shift = 1'b0;
+    done = 1'b0;
+    next_state = state;
+
+    case (state)
+    IDLE: begin
+        if (start) begin
+            load = 1'b1;
+            next_state = CHECK;
+        end
+    end
+
+    CHECK: begin
+        if (lsb) begin
+            next_state = ADD;
+        end else begin
+            next_state = SHIFT;
+        end
+    end
+
+    ADD: begin
+        add = 1'b1;
+        next_state = SHIFT;
+    end
+
+    SHIFT: begin
+        shift = 1'b1;
+        if (count == 6'd31) begin
+            next_state = DONE;
+        end else begin
+            next_state = CHECK;
+        end
+    end
+
+    DONE: begin
+        done = 1'b1;
+        next_state = IDLE;
+    end
+
+    default: begin
+        next_state = IDLE;
+    end
+    endcase
 end
 
 endmodule

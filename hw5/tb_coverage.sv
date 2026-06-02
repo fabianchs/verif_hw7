@@ -47,7 +47,7 @@ module tb_coverage();
     cross_operands: cross cp_operand_a, cp_operand_b;
   endgroup
 
-  covergroup cg_control @(posedge tb_top.intf.clk);
+  covergroup cg_control;
     option.per_instance = 1;
     option.name = "cg_control";
 
@@ -71,6 +71,9 @@ module tb_coverage();
   cg_control control_cov = new();
 
   always @(posedge tb_top.intf.clk) begin
+    #1;
+    control_cov.sample();
+
     if (tb_top.intf.reset) begin
       cov_a = 32'd0;
       cov_b = 32'd0;
