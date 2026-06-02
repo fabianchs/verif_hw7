@@ -29,9 +29,10 @@ module tb_top;
     .done(intf.done)
   );
 
-  // Instanciar tester y scoreboard
+  // Instanciar tester, scoreboard y cobertura
   tester t0();
   scoreboard sb();
+  tb_coverage cov();
 
   initial begin
     $dumpfile("wave_tb_top.vcd");

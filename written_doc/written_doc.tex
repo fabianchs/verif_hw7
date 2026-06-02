@@ -1,0 +1,143 @@
+﻿\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+
+\begin{document}
+
+\title{Covergroups en Verificación Funcional\\ \large Tecnológico de Costa Rica - Curso de Verificación Funcional}
+\author{Fabián Chacón Solano - 2018135154}
+\maketitle
+
+\section{¿Qué es un covergroup en verificación funcional?}
+
+Un \textit{covergroup} es una construcción de SystemVerilog utilizada para
+medir cobertura funcional. Su propósito es registrar qué valores, eventos o
+combinaciones relevantes del diseño han sido ejecutados durante una
+simulación. A diferencia de la cobertura de código, que indica qué partes de la
+implementación fueron ejecutadas, la cobertura funcional está relacionada con
+la intención del diseño y con el plan de verificación \cite{Spear2008}, por ende
+es una herramienta clave para evaluar el progreso de la verificación y asegurar que se e
+están evaluando los escenarios.
+
+En otras palabras, un \textit{covergroup} permite responder preguntas como:
+``¿se probaron todos los tipos de operación?'', ``¿se ejercitaron los casos
+borde?'' o ``¿se observaron las combinaciones importantes de entradas?''.
+Spear explica que la cobertura funcional ayuda a medir el progreso de la
+verificación y a encontrar huecos de cobertura que requieren nuevos estímulos
+o ajustes en las pruebas \cite{Spear2008}, este trabajo es fundamental
+puesto que humanamente es considerablemente complejo cubrir todos los
+escenarios posibles, por lo que el uso de covergroups es una herramienta relevante
+para el diseño funcional de circuitos integrados.
+
+\section{¿Qué partes tiene un covergroup?}
+
+Un \textit{covergroup} está formado principalmente por los siguientes elementos:
+
+\begin{itemize}
+    \item \textbf{Covergroup}: bloque que agrupa una o más mediciones de
+    cobertura. Puede ser muestreado explícitamente con el método
+    \texttt{sample()} o mediante un evento declarado en su definición.
+
+    \item \textbf{Coverpoints}: variables o expresiones que se desean observar.
+    Cada \textit{coverpoint} mide qué valores de una señal, variable o expresión
+    fueron ejecutados durante la simulación \cite{Spear2008}.
+
+    \item \textbf{Bins}: contadores asociados a valores o rangos de valores.
+    Los \textit{bins} son la unidad básica de medición de cobertura funcional,
+    cuando se muestrea un valor que cae dentro de un \textit{bin}, ese bin queda
+    cubierto \cite{Spear2008}.
+
+    \item \textbf{Cross coverage}: medición de combinaciones entre dos o más
+    \textit{coverpoints}. Se usa cuando no basta con saber que dos valores
+    aparecieron por separado, sino que es requereido para comprobar que aparecieron en
+    combinación \cite{Spear2008}.
+
+    \item \textbf{Opciones de cobertura}: parámetros como
+    \texttt{option.per\_instance}, \texttt{option.goal},
+    \texttt{option.weight} o límites para bins automáticos. Estas opciones
+    permiten controlar cómo se calcula y reporta la cobertura \cite{Spear2008}.
+
+    \item \textbf{Bins especiales}: SystemVerilog permite usar
+    \texttt{ignore\_bins} para excluir valores que no deben afectar el cálculo,
+    también \texttt{illegal\_bins} para marcar valores que representan situaciones
+    invalidas \cite{Spear2008}.
+\end{itemize}
+
+\section{¿Por qué es importante la implementación de covergroups?}
+
+La implementación de \textit{covergroups} es importante porque permite medir
+de manera explícita si el testbench realmente está verificando los escenarios
+definidos en el plan de verificación. Sin cobertura funcional, una simulación
+puede terminar sin errores y aun así no haber probado casos importantes del
+diseño.
+
+Spear resalta que la cobertura funcional se usa dentro de un ciclo de
+retroalimentación, osea se ejecutan pruebas, se analiza la cobertura alcanzada, se
+identifican huecos y luego se modifican los estímulos o restricciones para
+cubrir escenarios faltantes \cite{Spear2008}. Esto permite mejorar la calidad
+del proceso de verificación y tomar decisiones basadas en datos, no solo en la
+cantidad de pruebas ejecutadas.
+
+Además, los \textit{covergroups} ayudan a diferenciar entre haber ejecutado
+código y haber verificado funcionalidad. Un diseño puede alcanzar alta
+cobertura de código, pero seguir sin probar ciertas condiciones funcionales
+importantes. Por eso, la cobertura funcional complementa la cobertura de
+código y permite evaluar el avance frente a la especificación \cite{Spear2008}.
+
+\section{Recomendaciones para la creación de covergroups}
+
+Para crear \textit{covergroups} útiles se recomiendan las siguientes prácticas:
+
+\begin{itemize}
+    \item \textbf{Partir del plan de verificación}. Los \textit{coverpoints}
+    deben representar comportamientos, valores y combinaciones importantes
+    para la especificación, no señales escogidas al azar.
+
+    \item \textbf{Definir bins significativos}. Para señales grandes, no es conveniente
+    depender siempre de bins automáticos. Es preferible definir rangos útiles,
+    casos borde y valores especiales, como ceros, máximos, mínimos o estados
+    relevantes \cite{Spear2008}.
+
+    \item \textbf{Evitar cobertura decorativa}. Un \textit{covergroup} debe medir
+    algo que ayude a tomar decisiones de verificación. Si una métrica no cambia
+    la estrategia de pruebas, probablemente no aporta valor.
+
+    \item \textbf{Muestrear en el momento correcto}. La cobertura debe
+    muestrearse cuando los datos sean válidos, por ejemplo al completarse una
+    transacción o cuando el monitor observa una salida estable. Spear indica
+    que las dos partes principales de la cobertura funcional son los datos
+    muestreados y el momento en que se muestrean \cite{Spear2008}.
+
+    \item \textbf{Deshabilitar cobertura durante reset}. Se recomienda evitar
+    que valores de inicialización o reset contaminen la cobertura. Esto puede
+    hacerse con condiciones como \texttt{iff (!reset)} \cite{Spear2008}.
+
+    \item \textbf{Usar cross coverage con cuidado}. La cobertura cruzada puede
+    crecer rápidamente, ya que el número de bins aumenta con las combinaciones.
+    Por eso debe usarse solo cuando la relación entre variables sea realmente
+    importante \cite{Spear2008}.
+
+    \item \textbf{Usar \texttt{ignore\_bins} e \texttt{illegal\_bins} cuando
+    corresponda}. Los valores imposibles o irrelevantes deben excluirse del
+    cálculo, mientras que los valores inválidos deben marcarse como ilegales.
+
+    \item \textbf{Analizar los reportes de cobertura}. La cobertura no debe ser
+    solo un número final. Deben revisarse los bins sin cubrir para decidir si
+    se necesitan más datos aleatorios, pruebas dirigidas o cambios en las
+    restricciones.
+\end{itemize}
+
+\begin{thebibliography}{1}
+
+\bibitem{Spear2008}
+C. Spear, \textit{SystemVerilog for Verification: A Guide to Learning the
+Testbench Language Features}. New York, NY, USA: Springer Science+Business
+Media, 2008.
+
+\end{thebibliography}
+
+\end{document}
+
+
+

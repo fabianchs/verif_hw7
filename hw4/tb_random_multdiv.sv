@@ -126,6 +126,58 @@ module tb_random_multdiv;
 
     localparam int NUM_ITERATIONS = 64;
 
+    // --------------------------------------------------------------------
+    // Seccion de covergroups
+    // --------------------------------------------------------------------
+    operation_t  cov_op;
+    logic [31:0] cov_a;
+    logic [31:0] cov_b;
+    logic [63:0] cov_result;
+    bit          cov_passed;
+
+    covergroup cg_multdiv;
+        option.per_instance = 1;
+        option.name = "cg_multdiv";
+
+        cp_operation: coverpoint cov_op {
+            bins nop   = {no_op};
+            bins mult  = {mul_op};
+            bins div   = {div_op};
+            bins reset = {rst_op};
+        }
+
+        cp_operand_a: coverpoint cov_a {
+            bins zero = {32'd0};
+            bins low  = {[32'd1:32'd15]};
+            bins mid  = {[32'd16:32'h0000_FFFF]};
+            bins high = {[32'h0001_0000:32'hFFFF_FFFF]};
+        }
+
+        cp_operand_b: coverpoint cov_b {
+            bins zero = {32'd0};
+            bins low  = {[32'd1:32'd15]};
+            bins mid  = {[32'd16:32'h0000_FFFF]};
+            bins high = {[32'h0001_0000:32'hFFFF_FFFF]};
+        }
+
+        cp_result: coverpoint cov_result {
+            bins zero = {64'd0};
+            bins low  = {[64'd1:64'd255]};
+            bins mid  = {[64'd256:64'h0000_0000_FFFF_FFFF]};
+            bins high = {[64'h0000_0001_0000_0000:64'hFFFF_FFFF_FFFF_FFFF]};
+        }
+
+        cp_status: coverpoint cov_passed {
+            bins pass = {1'b1};
+            ignore_bins fail = {1'b0};
+        }
+
+        cross_op_a_b: cross cp_operation, cp_operand_a, cp_operand_b;
+        cross_op_status: cross cp_operation, cp_status;
+    endgroup
+
+    cg_multdiv cov = new();
+
     // Instancia del DUT principal que combina multiplicador y divisor
     multdiv32_top dut(
         .clk(clk),
@@ -165,11 +217,23 @@ module tb_random_multdiv;
     task automatic generator();
         tx_t tx;
         for (iter = 0; iter < NUM_ITERATIONS; iter++) begin
-            tx.op = get_operation();
-            tx.a = $random;
-            tx.b = $random;
-            tx.iter = iter;
-            tx.end_of_sequence = 1'b0;
+            case (iter)
+                0: tx = '{op:no_op, a:32'd0, b:32'd0, iter:iter, end_of_sequence:1'b0};
+                1: tx = '{op:rst_op, a:32'd0, b:32'd0, iter:iter, end_of_sequence:1'b0};
+                2: tx = '{op:mul_op, a:32'd0, b:32'd7, iter:iter, end_of_sequence:1'b0};
+                3: tx = '{op:mul_op, a:32'd12, b:32'd9, iter:iter, end_of_sequence:1'b0};
+                4: tx = '{op:div_op, a:32'd20, b:32'd4, iter:iter, end_of_sequence:1'b0};
+                5: tx = '{op:div_op, a:32'd27, b:32'd4, iter:iter, end_of_sequence:1'b0};
+                6: tx = '{op:mul_op, a:32'h0001_0000, b:32'd3, iter:iter, end_of_sequence:1'b0};
+                7: tx = '{op:div_op, a:32'h0001_0000, b:32'd16, iter:iter, end_of_sequence:1'b0};
+                default: begin
+                    tx.op = get_operation();
+                    tx.a = $random;
+                    tx.b = $random;
+                    tx.iter = iter;
+                    tx.end_of_sequence = 1'b0;
+                end
+            endcase
 
             if (tx.op == div_op && tx.b == 32'd0) begin
                 tx.b = 32'd1;
@@ -181,6 +245,22 @@ module tb_random_multdiv;
 
         tx = '{op:no_op, a:32'd0, b:32'd0, iter:0, end_of_sequence:1'b1};
         gen2drv.put(tx);
+    endtask
+
+    // Muestrea una transaccion completa para cobertura funcional.
+    task automatic sample_coverage(
+        operation_t op_i,
+        logic [31:0] a_i,
+        logic [31:0] b_i,
+        logic [63:0] result_i,
+        bit passed_i
+    );
+        cov_op = op_i;
+        cov_a = a_i;
+        cov_b = b_i;
+        cov_result = result_i;
+        cov_passed = passed_i;
+        cov.sample();
     endtask
 
     // Driver: toma la prueba y controla el DUT.
@@ -204,6 +284,7 @@ module tb_random_multdiv;
                 @(posedge clk);
                 reset = 0;
                 @(posedge clk);
+                sample_coverage(rst_op, tx.a, tx.b, 64'd0, 1'b1);
                 continue;
             end
 
@@ -214,6 +295,7 @@ module tb_random_multdiv;
                 a = 32'd0;
                 b = 32'd0;
                 @(posedge clk);
+                sample_coverage(no_op, tx.a, tx.b, 64'd0, 1'b1);
                 continue;
             end
 
@@ -289,9 +371,11 @@ module tb_random_multdiv;
                 $display("Iter %0d op=%0d A=%0d B=%0d esperado=%0d got=%0d",
                          item.iter, item.op, item.a, item.b, expected, item.result);
                 error_count += 1;
+                sample_coverage(item.op, item.a, item.b, item.result, 1'b0);
             end else begin
                 $display("Iter %0d op=%0d A=%0d B=%0d result=%0d",
                          item.iter, item.op, item.a, item.b, item.result);
+                sample_coverage(item.op, item.a, item.b, item.result, 1'b1);
             end
         end
     endtask
@@ -327,6 +411,7 @@ module tb_random_multdiv;
 
         // Reporte final de la prueba
         $display("RESULTADO FINAL: errores = %0d de %0d iteraciones", error_count, NUM_ITERATIONS);
+        $display("COBERTURA FUNCIONAL HW4 = %0.2f%%", cov.get_inst_coverage());
         if (error_count == 0) begin
             $display("TESTBENCH: PASSED");
         end else begin
