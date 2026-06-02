@@ -1,0 +1,359 @@
+$date
+	Fri Mar 13 07:52:20 2026
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module tb_divider $end
+$var wire 32 ! remainder [31:0] $end
+$var wire 32 " quotient [31:0] $end
+$var wire 1 # done $end
+$var reg 1 $ clk $end
+$var reg 32 % dividend [31:0] $end
+$var reg 32 & divisor [31:0] $end
+$var reg 1 ' reset $end
+$var reg 1 ( start $end
+$scope module uut $end
+$var wire 1 $ clk $end
+$var wire 32 ) dividend [31:0] $end
+$var wire 32 * divisor [31:0] $end
+$var wire 1 ' reset $end
+$var wire 1 ( start $end
+$var wire 32 + remainder [31:0] $end
+$var wire 32 , quotient [31:0] $end
+$var wire 1 - load $end
+$var wire 1 # done $end
+$scope module control $end
+$var wire 1 $ clk $end
+$var wire 1 ' reset $end
+$var wire 1 ( start $end
+$var parameter 2 . DONE $end
+$var parameter 2 / IDLE $end
+$var parameter 2 0 LOAD $end
+$var reg 1 # done $end
+$var reg 1 - load $end
+$var reg 2 1 state [1:0] $end
+$upscope $end
+$scope module datapath $end
+$var wire 1 $ clk $end
+$var wire 32 2 dividend [31:0] $end
+$var wire 32 3 divisor [31:0] $end
+$var wire 1 - load $end
+$var wire 32 4 quotient [31:0] $end
+$var wire 32 5 remainder [31:0] $end
+$var wire 1 ' reset $end
+$var reg 32 6 quotient_reg [31:0] $end
+$var reg 32 7 remainder_reg [31:0] $end
+$upscope $end
+$upscope $end
+$upscope $end
+$scope module tb_multiplier $end
+$var wire 64 8 result [63:0] $end
+$var wire 1 9 done $end
+$var reg 32 : a [31:0] $end
+$var reg 32 ; b [31:0] $end
+$var reg 1 < clk $end
+$var reg 1 = reset $end
+$var reg 1 > start $end
+$scope module uut $end
+$var wire 32 ? a [31:0] $end
+$var wire 32 @ b [31:0] $end
+$var wire 1 < clk $end
+$var wire 1 = reset $end
+$var wire 1 > start $end
+$var wire 1 A shift $end
+$var wire 64 B result [63:0] $end
+$var wire 1 C lsb $end
+$var wire 1 D load $end
+$var wire 1 9 done $end
+$var wire 1 E add $end
+$scope module control $end
+$var wire 1 < clk $end
+$var wire 1 = reset $end
+$var wire 1 > start $end
+$var wire 1 C lsb $end
+$var parameter 2 F ADD $end
+$var parameter 2 G CHECK $end
+$var parameter 2 H IDLE $end
+$var parameter 2 I SHIFT $end
+$var reg 1 E add $end
+$var reg 6 J count [5:0] $end
+$var reg 1 9 done $end
+$var reg 1 D load $end
+$var reg 1 A shift $end
+$var reg 2 K state [1:0] $end
+$upscope $end
+$scope module datapath $end
+$var wire 1 E add $end
+$var wire 1 < clk $end
+$var wire 1 D load $end
+$var wire 32 L multiplicand [31:0] $end
+$var wire 32 M multiplier [31:0] $end
+$var wire 64 N product [63:0] $end
+$var wire 1 = reset $end
+$var wire 1 A shift $end
+$var wire 1 C lsb $end
+$var reg 64 O multiplicand_shifted [63:0] $end
+$var reg 32 P multiplier_reg [31:0] $end
+$var reg 64 Q product_reg [63:0] $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+b11 I
+b0 H
+b1 G
+b10 F
+b1 0
+b0 /
+b10 .
+$end
+#0
+$dumpvars
+b0 Q
+b0 P
+b0 O
+b0 N
+bx M
+bx L
+b0 K
+b0 J
+0E
+0D
+0C
+b0 B
+0A
+bx @
+bx ?
+0>
+1=
+0<
+bx ;
+bx :
+09
+b0 8
+b0 7
+b0 6
+b0 5
+b0 4
+bx 3
+bx 2
+b0 1
+0-
+b0 ,
+b0 +
+bx *
+bx )
+0(
+1'
+bx &
+bx %
+0$
+0#
+b0 "
+b0 !
+$end
+#5000
+1<
+1$
+#10000
+0<
+0$
+1>
+b11 ;
+b11 @
+b11 M
+b111 :
+b111 ?
+b111 L
+0=
+1(
+b100 &
+b100 *
+b100 3
+b10100 %
+b10100 )
+b10100 2
+0'
+#15000
+b1 K
+1D
+b1 1
+1-
+1<
+1$
+#20000
+0<
+0$
+0>
+0(
+#25000
+1C
+b11 K
+0D
+b11 P
+b111 O
+b10 1
+1#
+0-
+b101 "
+b101 ,
+b101 4
+b101 6
+1<
+1$
+#30000
+0<
+0$
+#35000
+b1 K
+b1 J
+1A
+b0 1
+0#
+1<
+1$
+#40000
+0<
+0$
+#45000
+b10 K
+0A
+b1 P
+b1110 O
+b1 1
+1-
+1<
+1$
+1(
+b101 &
+b101 *
+b101 3
+b11001 %
+b11001 )
+b11001 2
+#50000
+0<
+0$
+#55000
+b11 K
+1E
+b10 1
+1#
+0-
+1<
+1$
+0(
+#60000
+0<
+0$
+#65000
+b1 K
+b10 J
+1A
+0E
+b1110 8
+b1110 B
+b1110 N
+b1110 Q
+b0 1
+0#
+1<
+1$
+#70000
+0<
+0$
+#75000
+0C
+b0 P
+b11100 O
+b10 K
+0A
+b1 1
+1-
+1<
+1$
+1(
+b100 &
+b100 *
+b100 3
+b11011 %
+b11011 )
+b11011 2
+#80000
+0<
+0$
+#85000
+b11 K
+1E
+b10 1
+1#
+0-
+b11 !
+b11 +
+b11 5
+b11 7
+b110 "
+b110 ,
+b110 4
+b110 6
+1<
+1$
+0(
+#90000
+0<
+0$
+#95000
+b101010 8
+b101010 B
+b101010 N
+b101010 Q
+b1 K
+b11 J
+1A
+0E
+b0 1
+0#
+1<
+1$
+#100000
+0<
+0$
+#105000
+b11 K
+0A
+b111000 O
+1<
+1$
+#110000
+0<
+0$
+#115000
+b1 K
+b100 J
+1A
+1<
+1$
+#120000
+0<
+0$
+#125000
+b11 K
+0A
+b1110000 O
+1<
+1$
+#130000
+0<
+0$
+#135000
+b1 K
+b101 J
+1A
+1<
+1$
